@@ -1,0 +1,30 @@
+name: Compile Osiris (Release x64)
+
+# 触发条件：允许手动点击运行，或代码更新时自动运行
+on:
+  workflow_dispatch: 
+  push:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    # 依据官方 Prerequisites: Visual Studio 2022
+    runs-on: windows-2022 
+
+    steps:
+    - name: 1. 拉取仓库源码
+      uses: actions/checkout@v4
+
+    - name: 2. 初始化 MSBuild 编译环境
+      uses: microsoft/setup-msbuild@v2
+
+    - name: 3. 执行核心编译 (Release | x64)
+      # 依据官方指南: set build configuration to Release | x64
+      run: msbuild Osiris.sln /p:Configuration=Release /p:Platform=x64 /m
+
+    - name: 4. 打包并输出编译产物
+      uses: actions/upload-artifact@v4
+      with:
+        name: Osiris-Release-x64-DLL
+        # 使用通配符自动全盘搜索生成的 dll 文件，确保小白不会因为路径报错
+        path: '**/*.dll'
